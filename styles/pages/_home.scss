@@ -1,0 +1,73 @@
+@use "../variables" as *;
+
+.hero {
+  text-align: center;
+  padding-top: 10svh;
+}
+
+.hero__title {
+  margin-bottom: 1.4rem;
+  line-height: 1.1;
+  font-size: clamp(2.8rem, 7vw, 5.5rem);
+
+  em {
+    color: $burgundy;
+    font-style: italic;
+  }
+}
+
+.hero__subtitle {
+  color: #1a1a1a;
+  font-size: 1.1rem;
+  margin-bottom: 3rem;
+  max-width: 500px;
+  margin-inline: auto;
+
+  strong {
+    cursor: pointer;
+    text-decoration: underline;
+    text-transform: uppercase;
+    color: #8b7349;
+  }
+}
+
+#landingImage,
+#landingImage2 {
+  width: 98%;
+  background-image: url("/static/landingpage.jpg"), linear-gradient(135deg, $cream, #d4c4a8);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: saturate(1) contrast(0.6) brightness(1.1);
+  animation: reveal12 2s ease forwards;
+  position: absolute;
+}
+
+#landingImage {
+  height: 30%;
+  top: 0;
+  left: -10%;
+  clip-path: polygon(0 0, 100% 0, 10% 100%, 0% 100%);
+}
+
+#landingImage2 {
+  height: 32%;
+  bottom: 0;
+  right: 0;
+  animation-duration: 2.4s;
+  clip-path: polygon(100% 0, 100% 0, 100% 100%, 10% 100%);
+}
+
+@media (max-width: 768px) {
+  .hero__title { font-size: 3.8em; margin-top: -0.8em; }
+}
+
+@media (min-width: 601px) and (max-width: 768px) {
+  .hero__title { margin-top: 0; }
+}
+
+@media (max-width: 601px) {
+  button, select, input, p, label, h2, h3, h4, h5, h6 {
+    transform: scale(0.9);
+  }
+}

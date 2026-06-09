@@ -1,0 +1,186 @@
+{% extends 'skeleton.html' %} {% block content %}
+
+<section class="portfolio-section">
+  <h2 style="font-size: 2rem; margin-bottom: 0.5rem; padding-left: 0.5rem">
+    Group Averages
+  </h2>
+  <p
+    style="
+      margin-bottom: 1.5rem;
+      color: #666;
+      padding-left: 0.5rem;
+      font-size: 0.9rem;
+    "
+  >
+    Aggregated stats from the group for wines you've tasted.
+  </p>
+
+  {% if stats %}
+  <div class="scrolling-wrapper">
+    {% for wine in stats %}
+    <article class="stat-card">
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 1rem;
+        "
+      >
+        <div class="stat-score-circle">{{ "%.1f"|format(wine.avg_score) }}</div>
+        <div style="text-align: right">
+          <span
+            style="
+              font-size: 0.7rem;
+              color: #999;
+              text-transform: uppercase;
+              display: block;
+            "
+          >
+            Tasted {{ wine.rating_count }}x
+          </span>
+          <span style="font-size: 0.6rem; color: var(--burgundy)"
+            >Group Stats</span
+          >
+        </div>
+      </div>
+
+      <div>
+        <h3 style="font-size: 1.3rem; line-height: 1.2; margin-bottom: 0.2rem">
+          {{ wine.wine_name }}
+        </h3>
+        <p style="font-size: 0.8rem; color: #888; margin-bottom: 0.8rem">
+          {{ wine.grape or 'Blend' }}
+        </p>
+        <div>
+          {% if wine.avg_year %}
+          <span class="crowd-stat"
+            >Avg Year: <strong>{{ wine.avg_year|round|int }}</strong></span
+          >
+          {% endif %} {% if wine.avg_price %}
+          <span class="crowd-stat"
+            >Avg Price:
+            <strong>€{{ "%.0f"|format(wine.avg_price) }}</strong></span
+          >
+          {% endif %}
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <p class="cellar-empty">
+    No ratings yet. Start tasting to build your portfolio.
+  </p>
+  {% endif %}
+</section>
+
+<section style="margin-bottom: 6rem">
+  <h2 style="font-size: 2rem; margin-bottom: 2rem; padding-left: 0.5rem">
+    Personal Journal
+  </h2>
+
+  {% for tasting in tastings %}
+  <article class="journal-entry-card">
+    <div
+      style="
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+      "
+    >
+      <span style="font-size: 0.8rem; color: #999">{{ tasting.date }}</span>
+      <span class="meta-tag">{{ tasting.grape or 'Blend' }}</span>
+    </div>
+
+    <h3
+      style="
+        font-size: 2.1rem;
+        color: var(--burgundy);
+        margin-bottom: 0.5rem;
+        line-height: 1.1;
+      "
+    >
+      {{ tasting.wine_name }}
+    </h3>
+
+    <p
+      style="
+        font-size: 0.9rem;
+        color: #666;
+        font-style: italic;
+        margin-bottom: 1.5rem;
+      "
+    >
+      {% if tasting.region %}{{ tasting.region }}{% endif %} {% if tasting.year
+      %} &bull; Guess: {{ tasting.year }}{% endif %} {% if tasting.price %}
+      &bull; €{{ tasting.price }}{% endif %}
+    </p>
+
+    <div class="notes-block">
+      <p><strong>Notes</strong> {{ tasting.scent }} / {{ tasting.flavour }}</p>
+      <p><strong>Finish</strong> {{ tasting.aftertaste or '—' }}</p>
+    </div>
+
+    <div class="grid-stats">
+      <div class="stat-box">
+        <small>Visual</small>
+        <span>{{ tasting.color or '—' }}</span>
+      </div>
+      <div class="stat-box">
+        <small>Acidity {{ tasting.acidity }}</small>
+        <div class="bar-container">
+          <div
+            class="bar-fill"
+            style="width:{{ tasting.acidity * 10 }}%; background:#aaa"
+          ></div>
+        </div>
+      </div>
+      <div class="stat-box">
+        <small>Tannin {{ tasting.tannin }}</small>
+        <div class="bar-container">
+          <div
+            class="bar-fill"
+            style="width:{{ tasting.tannin * 10 }}%; background:var(--burgundy)"
+          ></div>
+        </div>
+      </div>
+    </div>
+    <!-- overlapping component, position better if you decide to reveal this
+    <div class="score-badge">{{ tasting.score }}</div>
+    -->
+  </article>
+
+  {% else %}
+  <p class="cellar-empty">
+    Your cellar is empty.
+    <a href="/basics" style="color: var(--burgundy)">Start a tasting</a>.
+  </p>
+  {% endfor %}
+</section>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    if (typeof gsap === "undefined") return;
+
+    gsap.from(".journal-entry-card", {
+      y: 30,
+      opacity: 0,
+      duration: 0.6,
+      stagger: 0.1,
+      ease: "power2.out",
+    });
+    gsap.from(".stat-card", {
+      x: 30,
+      opacity: 0,
+      duration: 0.6,
+      stagger: 0.1,
+      delay: 0.2,
+      ease: "power2.out",
+    });
+  });
+</script>
+
+{% endblock %}

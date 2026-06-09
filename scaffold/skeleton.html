@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#4a0404" />
+  <meta name="description" content="Cellar50 Brasserie — blind wine tasting, digitized." />
+  <title>Cellar50 | Blind Wine Tasting</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="/components.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
+  <script src="/interface.js" defer></script>
+</head>
+<body>
+  <div class="app-background"></div>
+  <div class="vignette"></div>
+
+  <nav aria-label="Main">
+    <div class="logo">Cellar50<span>.</span>
+      <small>Brasserie</small>
+    </div>
+    <div class="nav-links">
+      <a href="/" class="{{ 'active' if active_page == 'home' }}">Home</a>
+      <a href="/discover" class="{{ 'active' if active_page == 'discover' }}">Discover</a>
+      <a href="/basics" class="{{ 'active' if active_page == 'tasting' or active_page == 'basics' }}">Tasting</a>
+      <a href="/cellar" class="{{ 'active' if active_page == 'cellar' }}">Cellar</a>
+    </div>
+  </nav>
+
+  <div class="nav-links2" aria-label="Mobile">
+    <a href="/" class="{{ 'active' if active_page == 'home' }}">Home</a>
+    <a href="/discover" class="{{ 'active' if active_page == 'discover' }}">Discover</a>
+    <a href="/basics" class="{{ 'active' if active_page == 'tasting' or active_page == 'basics' }}">Tasting</a>
+    <a href="/cellar" class="{{ 'active' if active_page == 'cellar' }}">Cellar</a>
+  </div>
+
+  <main id="container" class="container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <div id="toast-stack" class="toast-stack" aria-live="polite"></div>
+
+  <div id="custom-alert-overlay" class="alert-overlay" role="dialog" aria-modal="true">
+    <div class="alert-box">
+      <h3>Cellar50</h3>
+      <p id="custom-alert-msg">Message goes here</p>
+      <button onclick="Cellar50.closeAlert()" class="btn"
+        style="width:100%; padding:0.8rem">Close</button>
+    </div>
+  </div>
+</body>
+</html>

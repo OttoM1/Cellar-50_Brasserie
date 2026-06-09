@@ -1,0 +1,30 @@
+{% extends 'skeleton.html' %}
+{% block content %}
+
+<div id="landingImage" aria-hidden="true"></div>
+<div id="landingImage2" aria-hidden="true"></div>
+
+<section class="hero fade-in">
+  <h1 id="head" class="hero__title">
+    Challenge Your<br /><em>Palate</em>
+  </h1>
+
+  <p id="description" class="hero__subtitle">
+    Judge by the sip, not the label. Blind wine tasting by <strong>Cellar50.</strong>
+  </p>
+
+  <a href="/basics" class="btn">Start a Tasting</a>
+</section>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  if (typeof gsap === "undefined") return;
+
+  gsap.from(".hero__title", { y: 30, opacity: 0, duration: 1, ease: "power3.out" });
+  gsap.from(".hero__subtitle", { y: 20, opacity: 0, duration: 0.8, delay: 0.2 });
+  gsap.from(".hero .btn", { y: 16, opacity: 0, duration: 0.6, delay: 0.4 });
+});
+</script>
+
+{% endblock %}

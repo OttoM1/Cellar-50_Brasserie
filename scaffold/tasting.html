@@ -1,0 +1,312 @@
+{% extends 'skeleton.html' %} {% block content %}
+
+<aside id="cheatSheet" class="cheat-sheet-overlay" aria-label="Tasting notes reference">
+  <div class="cheat-sheet__header">
+    <h2>Tasting Notes</h2>
+    <button onclick="toggleCheatSheet(false)" aria-label="Close">&times;</button>
+  </div>
+
+  <div class="cs-tabs">
+    <button class="cs-tab active" data-tab="grapes" onclick="switchTab('grapes', this)">Grapes</button>
+    <button class="cs-tab" data-tab="age" onclick="switchTab('age', this)">Aging</button>
+    <button class="cs-tab" data-tab="regions" onclick="switchTab('regions', this)">Regions</button>
+  </div>
+
+  <div id="tab-grapes" class="cs-content active">
+    <div class="cs-item">
+      <h4>Cabernet Sauvignon</h4>
+      <p>Full-bodied, high tannins, blackcurrant, green pepper.</p>
+    </div>
+    <div class="cs-item"><h4>Merlot</h4><p>Softer than Cab. Plum, chocolate, velvet texture.</p></div>
+    <div class="cs-item">
+      <h4>Pinot Noir</h4>
+      <p>Light-bodied, pale color. Strawberry, earth, mushrooms.</p>
+    </div>
+    <div class="cs-item"><h4>Syrah / Shiraz</h4><p>Full-bodied. Black pepper, meat, dark fruit, spice.</p></div>
+    <div class="cs-item">
+      <h4>Chardonnay</h4>
+      <p><strong>Oaked:</strong> Butter, vanilla. <strong>Unoaked:</strong> Apple, lemon.</p>
+    </div>
+    <div class="cs-item"><h4>Sauvignon Blanc</h4><p>High acidity. Gooseberry, grass, lime.</p></div>
+    <div class="cs-item"><h4>Riesling</h4><p>Aromatic. Lime, green apple, petrol (aged), honey.</p></div>
+  </div>
+
+  <div id="tab-age" class="cs-content">
+    <div class="cs-item">
+      <h4>Young Wines (1–4 Years)</h4>
+      <p><strong>Reds:</strong> Vibrant color, fresh fruit, grippy tannins.<br>
+      <strong>Whites:</strong> Pale, crisp acidity, citrus.</p>
+    </div>
+    <div class="cs-item">
+      <h4>Mature Wines (5–10+ Years)</h4>
+      <p><strong>Reds:</strong> Brick tones, dried fruit, leather, tobacco.<br>
+      <strong>Whites:</strong> Gold/amber, nutty, honeyed notes.</p>
+    </div>
+  </div>
+
+  <div id="tab-regions" class="cs-content">
+    <div class="cs-item"><h4>France</h4><p><strong>Bordeaux:</strong> Structured blends. <strong>Burgundy:</strong> Elegant Pinot/Chardonnay.</p></div>
+    <div class="cs-item"><h4>Italy</h4><p><strong>Tuscany:</strong> Sangiovese, cherry, herbs. <strong>Piedmont:</strong> Nebbiolo, tar, roses.</p></div>
+    <div class="cs-item"><h4>USA</h4><p><strong>Napa:</strong> Bold Cab & Chardonnay. <strong>Oregon:</strong> Earthy Pinot Noir.</p></div>
+    <div class="cs-item"><h4>New Zealand</h4><p><strong>Marlborough:</strong> Intense Sauvignon Blanc.</p></div>
+  </div>
+</aside>
+
+
+<div class="tasting-interface">
+  <div class="progress-container" aria-hidden="true">
+    <div id="liquidProgress" class="progress-fill"></div>
+  </div>
+
+  <div class="step-counter">
+    Wine {{ current_index }} / {{ total_wines }}<br>
+    <span style="font-size:0.6rem; opacity:0.6">Room: {{ room_code }}</span>
+  </div>
+
+  <div class="tasting-card">
+    <button class="hint-btn" onclick="toggleCheatSheet(true)"
+      title="Open cheat sheet" aria-label="Open cheat sheet">?</button>
+    <input type="hidden" id="wineName" value="{{ current_wine }}" />
+
+    <!-- intro -->
+    <div class="wizard-step active" data-step="0">
+      <div class="gsap-elem">
+        <h3 class="tasting-intro__label">Now Tasting</h3>
+        <h1 class="tasting-intro__wine">{{ current_wine }}</h1>
+        <p style="color:#666; font-style:italic">Take a sip. Let it breathe. What do you see?</p>
+      </div>
+      <div class="action-bar">
+        <button onclick="animateNext(1)" class="btn gsap-elem">Start Rating</button>
+      </div>
+    </div>
+
+    <div class="wizard-step" data-step="1">
+      <h2 class="q-title gsap-elem">Visuals</h2>
+      <p class="q-subtitle gsap-elem">Assess the intensity of the color.</p>
+      <div class="option-grid gsap-elem">
+        <button class="pill-btn" onclick="selectOption('color','Pale',this)">
+          <span class="color-dot" style="background:#e6cba5"></span>Pale
+        </button>
+        <button class="pill-btn" onclick="selectOption('color','Medium',this)">
+          <span class="color-dot" style="background:#b52f2f"></span>Medium
+        </button>
+        <button class="pill-btn" onclick="selectOption('color','Deep',this)">
+          <span class="color-dot" style="background:#4a0404"></span>Deep
+        </button>
+      </div>
+      <div class="action-bar gsap-elem">
+        <button onclick="animateNext(2)" class="btn">Next</button>
+      </div>
+    </div>
+
+    <div class="wizard-step" data-step="2">
+      <h2 class="q-title gsap-elem">The Nose</h2>
+      <p class="q-subtitle gsap-elem">What aromas can you identify?</p>
+      <div class="gsap-elem">
+        <input type="text" id="scent" placeholder="e.g. Cherry, Oak, Leather..." autocomplete="off" />
+      </div>
+      <div class="action-bar gsap-elem">
+        <button onclick="animateBack(1)" class="back-btn">Back</button>
+        <button onclick="animateNext(3)" class="btn">Next</button>
+      </div>
+    </div>
+
+    <div class="wizard-step" data-step="3">
+      <h2 class="q-title gsap-elem">The Palate</h2>
+      <p class="q-subtitle gsap-elem">Describe flavours and finish.</p>
+      <div class="gsap-elem field-stack">
+        <input type="text" id="flavour" placeholder="Flavours (e.g. Red fruits)" autocomplete="off" />
+        <input type="text" id="aftertaste" placeholder="Aftertaste (e.g. Long, Spicy)" autocomplete="off" />
+      </div>
+      <div class="action-bar gsap-elem">
+        <button onclick="animateBack(2)" class="back-btn">Back</button>
+        <button onclick="animateNext(4)" class="btn">Next</button>
+      </div>
+    </div>
+
+    <div class="wizard-step" data-step="4">
+      <h2 class="q-title gsap-elem">Structure</h2>
+      <p class="q-subtitle gsap-elem">Analyze the backbone of the wine.</p>
+
+      <div class="gsap-elem" style="margin-bottom:1rem">
+        <label class="range-label"><span>Acidity</span> <span id="acidity-val">5</span></label>
+        <input type="range" id="acidity" min="1" max="10" value="5" oninput="updateRangeVal('acidity')" />
+      </div>
+      <div class="gsap-elem">
+        <label class="range-label"><span>Tannin</span> <span id="tannin-val">5</span></label>
+        <input type="range" id="tannin" min="1" max="10" value="5" oninput="updateRangeVal('tannin')" />
+      </div>
+
+      <div class="action-bar gsap-elem">
+        <button onclick="animateBack(3)" class="back-btn">Back</button>
+        <button onclick="animateNext(5)" class="btn">Next</button>
+      </div>
+    </div>
+
+    <div class="wizard-step" data-step="5">
+      <h2 class="q-title gsap-elem">The Guess</h2>
+      <p class="q-subtitle gsap-elem">Identify the origin and vintage.</p>
+
+      <div class="gsap-elem field-stack">
+        <input type="text" id="country" placeholder="Country" />
+        <input type="text" id="region" placeholder="Region" />
+        <select id="grape">
+          <option value="" disabled selected>Select Grape</option>
+          <option value="Cabernet Sauvignon">Cabernet Sauvignon</option>
+          <option value="Merlot">Merlot</option>
+          <option value="Pinot Noir">Pinot Noir</option>
+          <option value="Syrah/Shiraz">Syrah / Shiraz</option>
+          <option value="Sangiovese">Sangiovese</option>
+          <option value="Nebbiolo">Nebbiolo</option>
+          <option value="Chardonnay">Chardonnay</option>
+          <option value="Sauvignon Blanc">Sauvignon Blanc</option>
+          <option value="Riesling">Riesling</option>
+          <option value="Blend">Blend</option>
+          <option value="Other">Other</option>
+        </select>
+        <div class="field-row">
+          <input type="number" id="year" placeholder="Year" style="width:50%" />
+          <input type="number" id="price" placeholder="€ Price" style="width:50%" />
+        </div>
+      </div>
+
+      <div class="action-bar gsap-elem">
+        <button onclick="animateBack(4)" class="back-btn">Back</button>
+        <button onclick="animateNext(6)" class="btn">Next</button>
+      </div>
+    </div>
+
+    <div class="wizard-step" data-step="6">
+      <h2 class="q-title gsap-elem">Overall Score</h2>
+      <p class="q-subtitle gsap-elem">Rate the wine out of 5.</p>
+
+      <div class="gsap-elem" style="text-align:center; margin:3rem 0">
+        <input type="number" id="Score" class="score-input" min="1" max="5" step="0.5" placeholder="-" />
+      </div>
+
+      <div class="action-bar gsap-elem">
+        <button onclick="animateBack(5)" class="back-btn">Back</button>
+        <button onclick="submitTasting()" class="btn" id="submitBtn" style="width:100%">Submit Rating</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<script>
+let currentStep = 0;
+const tastingData = {
+  wineName: document.getElementById("wineName").value,
+  color: "", scent: "", flavour: "", aftertaste: "",
+  acidity: 5, tannin: 5,
+  country: "", region: "", grape: "",
+  year: null, price: null, score: null,
+};
+
+function toggleCheatSheet(open) {
+  document.getElementById("cheatSheet").classList.toggle("open", open);
+}
+
+function switchTab(tabName, btn) {
+  document.querySelectorAll(".cs-tab").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  document.querySelectorAll(".cs-content").forEach(c => c.classList.remove("active"));
+  document.getElementById("tab-" + tabName).classList.add("active");
+}
+
+function toggleNav(show) {
+  const nav = document.querySelector(".nav-links2");
+  if (!nav || typeof gsap === "undefined") return;
+  gsap.to(nav, {
+    y: show ? 0 : 40, opacity: show ? 1 : 0,
+    duration: 0.5, pointerEvents: show ? "all" : "none"
+  });
+}
+
+function updateRangeVal(id) {
+  document.getElementById(id + "-val").textContent = document.getElementById(id).value;
+}
+
+function selectOption(category, value, btn) {
+  tastingData[category] = value;
+  btn.parentElement.querySelectorAll(".pill-btn").forEach(b => b.classList.remove("selected"));
+  btn.classList.add("selected");
+}
+
+function transitionStep(fromStep, toStep, direction) {
+  const currentEl = document.querySelector(`.wizard-step[data-step="${fromStep}"]`),
+        nextEl = document.querySelector(`.wizard-step[data-step="${toStep}"]`);
+  const outX = direction === "forward" ? -50 : 50,
+        inX = direction === "forward" ? 50 : -50;
+
+  const finish = () => {
+    currentEl.classList.remove("active");
+    nextEl.classList.add("active");
+    if (typeof gsap !== "undefined") {
+      gsap.set(nextEl.querySelectorAll(".gsap-elem"), { x: inX, opacity: 0 });
+      gsap.to(nextEl.querySelectorAll(".gsap-elem"), {
+        x: 0, opacity: 1, stagger: 0.1, duration: 0.3, ease: "power2.out"
+      });
+      gsap.to("#liquidProgress", { height: `${(toStep / 6) * 100}%`, duration: 0.8 });
+    }
+    currentStep = toStep;
+  };
+
+  if (typeof gsap === "undefined") { finish(); return; }
+
+  gsap.to(currentEl.querySelectorAll(".gsap-elem"), {
+    x: outX, opacity: 0, stagger: 0.05, duration: 0.2, ease: "power2.in",
+    onComplete: finish,
+  });
+}
+
+function animateNext(nextStep) {
+  if (nextStep === 1) toggleNav(false);
+  transitionStep(currentStep, nextStep, "forward");
+}
+
+function animateBack(prevStep) {
+  if (prevStep === 0) toggleNav(true);
+  transitionStep(currentStep, prevStep, "back");
+}
+
+async function submitTasting() {
+  tastingData.scent = document.getElementById("scent").value;
+  tastingData.flavour = document.getElementById("flavour").value;
+  tastingData.aftertaste = document.getElementById("aftertaste").value;
+  tastingData.acidity = Number(document.getElementById("acidity").value);
+  tastingData.tannin = Number(document.getElementById("tannin").value);
+  tastingData.country = document.getElementById("country").value;
+  tastingData.region = document.getElementById("region").value;
+  tastingData.grape = document.getElementById("grape").value;
+  tastingData.year = document.getElementById("year").value || null;
+  tastingData.price = document.getElementById("price").value || null;
+  tastingData.score = Number(document.getElementById("Score").value);
+
+  if (!tastingData.score || tastingData.score < 1 || tastingData.score > 5)
+    return alert("Please enter a valid score (1–5)");
+
+  const btn = document.getElementById("submitBtn");
+  btn.disabled = true;
+
+  try {
+    await Cellar50.api("/save_tasting", { method: "POST", body: JSON.stringify(tastingData) });
+    toggleNav(true);
+    Cellar50.toast("Rating saved");
+
+    if (typeof gsap !== "undefined") {
+      gsap.to(".tasting-card", {
+        scale: 0.9, opacity: 0, duration: 0.3,
+        onComplete: () => window.location.reload()
+      });
+    } else window.location.reload();
+
+  } catch (err) {
+    alert(err.message || "Error saving tasting.");
+    btn.disabled = false;
+  }
+}
+</script>
+
+{% endblock %}

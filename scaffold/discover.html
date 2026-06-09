@@ -1,0 +1,84 @@
+{% extends 'skeleton.html' %} {% block content %}
+
+<div class="cellarBg" aria-hidden="true"></div>
+
+<section class="discover">
+  <h2 class="discover-header">The Cellar 50</h2>
+
+  <form class="discover-toolbar" method="get" action="/discover" id="discoverForm">
+    <input type="hidden" name="type" id="filterType" value="{{ filter_type or '' }}" />
+
+    <input type="search" name="q" class="discover-search"
+      placeholder="Search wines, regions, tags..."
+      value="{{ search_q or '' }}" aria-label="Search wines" />
+
+    <div class="filter-pills" role="group" aria-label="Filter by type">
+      {% set types = ['', 'White', 'Sparkling', 'Rosé', 'Red'] %}
+      {% for t in types %}
+      <button type="button"
+        class="filter-pill {{ 'active' if filter_type == t }}"
+        onclick="setFilter('{{ t }}')">{{ t if t else 'All' }}</button>
+      {% endfor %}
+    </div>
+  </form>
+
+  <p class="discover-count">{{ wines|length }} bottle{{ 's' if wines|length != 1 else '' }} in catalog</p>
+
+  {% if wines %}
+  <div class="wine-grid" id="wineGrid">
+    {% for wine in wines %}
+    <article class="wine-card" data-type="{{ wine.type }}" tabindex="0">
+      <div class="wine-meta">
+        <span>{{ wine.region }}</span><span>{{ wine.year }}</span>
+      </div>
+      <h3>{{ wine.name }}</h3>
+      <p>{{ wine.type }}</p>
+      <div style="margin-top:1rem">
+        {% for tag in wine.tags.split(',') %}
+        <span class="wine-tag">{{ tag.strip() }}</span>
+        {% endfor %}
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="discover-empty">No wines match that filter. Try a broader search.</p>
+  {% endif %}
+</section>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const cards = document.querySelectorAll(".wine-card:not(.wine-card2)");
+
+  cards.forEach(el => {
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add("wine-card2"); obs.unobserve(e.target); }
+      });
+    }, { threshold: 0.4 });
+    obs.observe(el);
+  });
+
+  document.querySelectorAll(".wine-card").forEach(card => {
+    card.addEventListener("click", () => {
+      document.querySelectorAll(".wine-card.is-active").forEach(c => c.classList.remove("is-active"));
+      card.classList.add("is-active");
+    });
+  });
+
+  const search = document.querySelector(".discover-search");
+  if (search) {
+    search.addEventListener("input", Cellar50.debounce(() => {
+      document.getElementById("discoverForm").requestSubmit();
+    }, 400));
+  }
+});
+
+function setFilter(type) {
+  document.getElementById("filterType").value = type;
+  document.getElementById("discoverForm").requestSubmit();
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,319 @@
+@use "variables" as *;
+@use "mixins" as *;
+
+.glass-panel { @include glass-panel; }
+
+.btn {
+  display: inline-block;
+  background: $burgundy;
+  color: white;
+  padding: 1rem 2.5rem;
+  border-radius: $radius-pill;
+  font-family: $font-sans;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s $ease-spring;
+  box-shadow: 0 3px 10px rgba(74, 4, 4, 0.3);
+  z-index: 1000;
+
+  @include focus-ring;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(74, 4, 4, 0.3);
+    background: $burgundy-light;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  &--ghost {
+    background: transparent;
+    color: $burgundy;
+    border: 1px solid $burgundy;
+    box-shadow: none;
+
+    &:hover {
+      background: rgba(74, 4, 4, 0.05);
+    }
+  }
+
+  &--sm {
+    padding: 0.6rem 1.4rem;
+    font-size: 0.72rem;
+  }
+}
+
+input[type="text"],
+input[type="number"],
+select {
+  width: 100%;
+  padding: 1rem;
+  cursor: text;
+  border: none;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: $radius-sm;
+  border-bottom: 2px solid rgba(74, 4, 4, 0.1);
+  font-family: $font-serif;
+  font-size: 1.1rem;
+  transition: 0.3s;
+  outline: none;
+
+  @include focus-ring;
+
+  &:focus {
+    background: white;
+    border-bottom-color: $burgundy;
+  }
+}
+
+select { cursor: pointer; }
+
+.wine-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(288px, 1fr));
+  gap: 2rem;
+}
+
+.wine-card {
+  background: #fff;
+  padding: 2rem;
+  position: relative;
+  opacity: 0;
+  transition: all 0.8s;
+  transform: scale(0.92);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+  overflow: hidden;
+  isolation: isolate;
+
+  &.wine-card2 {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    z-index: 0;
+  }
+
+  &::before {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 42%;
+    height: 100%;
+    content: "";
+    background-color: #fff;
+    background-size: contain;
+    background-position: center right;
+    background-repeat: no-repeat;
+    z-index: 1;
+    mix-blend-mode: multiply;
+    opacity: 0.92;
+    pointer-events: none;
+  }
+
+  > * {
+    position: relative;
+    z-index: 2;
+  }
+
+  .wine-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: $gold-bright;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+    max-width: 58%;
+  }
+
+  h3, p, div { max-width: 62%; }
+}
+
+.wine-card[data-type="Red"] {
+  @include wine-type-accent($wine-red);
+  &::before { background-image: url("/static/red.jpg"), linear-gradient(135deg, #4a0404, #b52f2f); }
+}
+
+.wine-card[data-type="White"] {
+  @include wine-type-accent($wine-white);
+  &::before { background-image: url("/static/white.jpg"), linear-gradient(135deg, #d4cfc0, #8a8a7a); }
+}
+
+.wine-card[data-type="Sparkling"] {
+  @include wine-type-accent($wine-sparkling);
+  span { text-shadow: 0 2px 4px white; }
+  &::before { background-image: url("/static/champagne.jpg"), linear-gradient(135deg, #1a4d2e, #226739); }
+}
+
+.wine-card[data-type="Rosé"],
+.wine-card[data-type="Rose"] {
+  @include wine-type-accent($wine-rose);
+  &::before { background-image: url("/static/rose.jpg"), linear-gradient(135deg, #ff9a6c, #ff7738); }
+}
+
+.wine-tag {
+  font-size: 0.7rem;
+  background: rgba(0, 0, 0, 0.06);
+  padding: 2px 8px;
+  margin-right: 5px;
+  border-radius: 4px;
+}
+
+.wizard-step {
+  display: none;
+  opacity: 0;
+
+  &.active {
+    display: block;
+    opacity: 1;
+    animation: fadeIn 0.5s ease;
+  }
+}
+
+.option-btn, .pill-btn {
+  padding: 1rem;
+  border: 1px solid $stone;
+  background: transparent;
+  cursor: pointer;
+  font-family: $font-sans;
+  transition: 0.3s;
+  @include focus-ring;
+
+  &.selected {
+    background: $burgundy;
+    color: white;
+    border-color: $burgundy;
+  }
+}
+
+.pill-btn {
+  border-radius: 12px;
+  color: #555;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+
+  &:hover {
+    background: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  }
+
+  &.selected {
+    box-shadow: 0 5px 15px rgba(74, 4, 4, 0.3);
+  }
+}
+
+.journal-entry {
+  padding-left: 2rem;
+  border-left: 1px solid $gold;
+  margin-bottom: 3rem;
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: -5px;
+    top: 0;
+    width: 9px;
+    height: 9px;
+    background: $burgundy;
+    border-radius: 50%;
+  }
+}
+
+.alert-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 248, 206, 0);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: $overlay-z;
+  pointer-events: all;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+
+  &.active {
+    display: flex;
+    opacity: 1;
+  }
+}
+
+.alert-box {
+  background: #fff;
+  padding: 2rem;
+  width: 90%;
+  max-width: 400px;
+  z-index: 999;
+  text-align: center;
+  box-shadow: 0 3px 10px rgba(28, 26, 20, 0.3);
+  border: 1px solid $stone;
+  border-top: 2px solid $burgundy;
+  transform: translateY(16px);
+  transition: transform 0.6s ease;
+
+  h3 {
+    margin-top: 0;
+    font-size: 1.5rem;
+  }
+
+  p {
+    color: #555;
+    font-size: 1.1rem;
+    margin: 1.5rem 0;
+  }
+
+  .alert-overlay.active & {
+    transform: translateY(0);
+  }
+}
+
+.toast-stack {
+  position: fixed;
+  bottom: 6.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: $toast-z;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  pointer-events: none;
+  width: min(90vw, 360px);
+
+  @media (min-width: 769px) {
+    bottom: 2rem;
+  }
+}
+
+.toast {
+  background: $charcoal;
+  color: white;
+  padding: 0.85rem 1.2rem;
+  border-radius: $radius-sm;
+  font-size: 0.85rem;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  animation: toastIn 0.35s $ease-out-expo forwards;
+
+  &--success { border-left: 3px solid #4caf50; }
+  &--error { border-left: 3px solid #e53935; }
+
+  &.toast--out { animation: toastOut 0.3s ease forwards; }
+}

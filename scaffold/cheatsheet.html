@@ -1,0 +1,846 @@
+{% extends 'skeleton.html' %} {% block content %}
+
+<style>
+  .cheat-sheet-overlay {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 100%;
+    max-width: 400px;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: -10px 0 40px rgba(0, 0, 0, 0.1);
+    z-index: 9999;
+    padding: 2rem;
+    overflow-y: auto;
+    transition: right 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    display: flex;
+    flex-direction: column;
+  }
+  .cheat-sheet-overlay.open {
+    right: 0;
+  }
+
+  .cs-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #eee;
+  }
+  .cs-tab {
+    background: transparent;
+    border: none;
+    padding-bottom: 0.5rem;
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    color: #999;
+    cursor: pointer;
+  }
+  .cs-tab.active {
+    color: var(--burgundy);
+    border-bottom: 2px solid var(--burgundy);
+    font-weight: 600;
+  }
+
+  .cs-content {
+    display: none;
+    animation: fadeIn 0.4s;
+  }
+  .cs-content.active {
+    display: block;
+  }
+
+  .cs-item {
+    margin-bottom: 1.5rem;
+    border-bottom: 1px dashed #eee;
+    padding-bottom: 1rem;
+  }
+  .cs-item h4 {
+    font-size: 1.1rem;
+    margin-bottom: 0.3rem;
+    color: var(--burgundy);
+  }
+  .cs-item p {
+    font-size: 0.9rem;
+    color: #555;
+    line-height: 1.5;
+    margin: 0;
+  }
+  .cs-tag {
+    font-size: 0.7rem;
+    background: #eee;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #666;
+  }
+  /* Cheat  Trigger Button */
+  .hint-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(74, 4, 4, 0.05);
+    color: var(--burgundy);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: var(--font-serif);
+    transition: 0.2s;
+    z-index: 10;
+  }
+  .hint-btn:hover {
+    background: var(--burgundy);
+    color: white;
+    cursor: pointer;
+
+    transform: scale(1.1);
+  }
+
+  .tasting-interface {
+    max-width: 500px;
+    margin: 0 auto;
+    min-height: 82svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    padding-bottom: 2rem;
+  }
+
+  .progress-container {
+    position: absolute;
+    top: 0;
+    left: -20px;
+    bottom: 0;
+    width: 4px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+    display: none;
+  }
+  @media (min-width: 768px) {
+    .progress-container {
+      display: block;
+    }
+  }
+
+  .progress-fill {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 0%;
+    background: var(--burgundy);
+    border-radius: 4px;
+    transition: height 1s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .step-counter {
+    text-align: center;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 2rem;
+  }
+
+  .tasting-card {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid white;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+    border-radius: 30px;
+    padding: 3rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .q-title {
+    font-size: 2.2rem;
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+    color: var(--burgundy);
+  }
+  .q-subtitle {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 2.5rem;
+    font-family: var(--font-sans);
+  }
+
+  .option-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 10px;
+    margin-bottom: 2rem;
+  }
+  .pill-btn {
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    background: transparent;
+    color: #555;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+  }
+  .pill-btn:hover {
+    background: #fff;
+    cursor: pointer;
+
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  }
+  .pill-btn.selected {
+    background: var(--burgundy);
+    color: white;
+    border-color: var(--burgundy);
+    box-shadow: 0 5px 15px rgba(74, 4, 4, 0.3);
+  }
+
+  .color-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: inline-block;
+    border: 2px solid white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    background: transparent;
+    margin: 1rem 0 2rem 0;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 24px;
+    width: 24px;
+    border-radius: 50%;
+    background: var(--burgundy);
+    cursor: pointer;
+    margin-top: -10px;
+    box-shadow: 0 2px 10px rgba(74, 4, 4, 0.4);
+    transition: transform 0.4s;
+  }
+  input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+  }
+  input[type="range"]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 4px;
+    background: #ddd;
+    border-radius: 2px;
+  }
+
+  .wizard-step {
+    display: none;
+    opacity: 0;
+  }
+  .wizard-step.active {
+    display: block;
+    opacity: 1;
+  }
+
+  .action-bar {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+  .back-btn {
+    background: transparent;
+    border: none;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    margin-right: auto;
+    padding: 10px;
+  }
+</style>
+
+<div id="cheatSheet" class="cheat-sheet-overlay">
+  <div
+    style="
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    "
+  >
+    <h2 style="margin: 0; font-size: 1.8rem">Tasting Notes</h2>
+    <button
+      onclick="toggleCheatSheet(false)"
+      style="background: none; border: none; font-size: 1.5rem; cursor: pointer"
+    >
+      &times;
+    </button>
+  </div>
+
+  <div class="cs-tabs">
+    <button class="cs-tab active" onclick="switchTab('grapes')">Grapes</button>
+    <button class="cs-tab" onclick="switchTab('age')">Aging</button>
+    <button class="cs-tab" onclick="switchTab('regions')">Regions</button>
+  </div>
+
+  <div id="tab-grapes" class="cs-content active">
+    <div class="cs-item">
+      <h4>Cabernet Sauvignon</h4>
+      <p>
+        The King of Reds. Full-bodied, high tannins, blackcurrant, green pepper.
+      </p>
+    </div>
+    <div class="cs-item">
+      <h4>Merlot</h4>
+      <p>The Charmer. Softer than Cab. Plum, chocolate, velvet texture.</p>
+    </div>
+    <div class="cs-item">
+      <h4>Pinot Noir</h4>
+      <p>
+        The Poet. Light-bodied, pale color. Strawberry, earth, mushrooms.
+        Delicate.
+      </p>
+    </div>
+    <div class="cs-item">
+      <h4>Syrah / Shiraz</h4>
+      <p>The Wild One. Full-bodied. Black pepper, meat, dark fruit, spice.</p>
+    </div>
+    <div class="cs-item">
+      <h4>Chardonnay</h4>
+      <p>
+        The Chameleon. <br /><strong>Oaked:</strong> Butter, vanilla, toast.<br /><strong
+          >Unoaked:</strong
+        >
+        Apple, lemon, crisp.
+      </p>
+    </div>
+    <div class="cs-item">
+      <h4>Sauvignon Blanc</h4>
+      <p>The Zest. High acidity. Gooseberry, grass, lime, passionfruit.</p>
+    </div>
+    <div class="cs-item">
+      <h4>Riesling</h4>
+      <p>The Pure. Aromatic. Lime, green apple, petrol (aged), honey.</p>
+    </div>
+  </div>
+
+  <div id="tab-age" class="cs-content">
+    <div class="cs-item">
+      <h4>Young Wines (1-4 Years)</h4>
+      <p>
+        <strong>Reds:</strong> Vibrant color (purple/ruby). Fresh fruit flavors.
+        Tannins feel "grippy" or drying.
+      </p>
+      <p style="margin-top: 5px">
+        <strong>Whites:</strong> Pale, greenish hints. Crisp acidity, fresh
+        flowers and citrus.
+      </p>
+    </div>
+    <div class="cs-item">
+      <h4>Mature Wines (5-10+ Years)</h4>
+      <p>
+        <strong>Reds:</strong> Color fades to brick/orange. Fresh fruit turns to
+        dried fruit (fig, prune). Flavors of leather, tobacco, forest floor
+        emerge. Tannins soften.
+      </p>
+      <p style="margin-top: 5px">
+        <strong>Whites:</strong> Color deepens to gold/amber. Nutty, honeyed,
+        savory notes replace fresh fruit.
+      </p>
+    </div>
+  </div>
+
+  <div id="tab-regions" class="cs-content">
+    <div class="cs-item">
+      <h4>France 🇫🇷</h4>
+      <p><strong>Bordeaux:</strong> Blends (Cab/Merlot). Earthy, structured.</p>
+      <p>
+        <strong>Burgundy:</strong> Pinot Noir / Chardonnay. Elegant,
+        terroir-driven.
+      </p>
+      <p><strong>Loire:</strong> Sauvignon Blanc (Sancerre). Mineral, sharp.</p>
+    </div>
+    <div class="cs-item">
+      <h4>Italy 🇮🇹</h4>
+      <p>
+        <strong>Tuscany:</strong> Sangiovese (Chianti). Cherry, herbs, high
+        acid.
+      </p>
+      <p>
+        <strong>Piedmont:</strong> Nebbiolo (Barolo). Tar, roses, high tannin.
+      </p>
+    </div>
+    <div class="cs-item">
+      <h4>USA 🇺🇸</h4>
+      <p>
+        <strong>Napa Valley:</strong> Cabernet & Chardonnay. Ripe, bold, oaky,
+        high alcohol.
+      </p>
+      <p>
+        <strong>Oregon:</strong> Pinot Noir. Earthy, fruity, similar to
+        Burgundy.
+      </p>
+    </div>
+    <div class="cs-item">
+      <h4>New Zealand 🇳🇿</h4>
+      <p>
+        <strong>Marlborough:</strong> Sauvignon Blanc. Intense tropical fruit,
+        zesty.
+      </p>
+    </div>
+    <div class="cs-item">
+      <h4>Spain 🇪🇸</h4>
+      <p>
+        <strong>Rioja:</strong> Tempranillo. Vanilla, dill (from oak), red
+        berry.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!---->
+
+<div class="tasting-interface">
+  <div class="progress-container">
+    <div id="liquidProgress" class="progress-fill"></div>
+  </div>
+
+  <div class="step-counter">
+    <span>Wine {{ current_index }}</span> / {{ total_wines }} <br />
+    <span style="font-size: 0.6rem; opacity: 0.6">Room: {{ room_code }}</span>
+  </div>
+
+  <div class="tasting-card">
+    <input type="hidden" id="wineName" value="{{ current_wine }}" />
+
+    <div class="wizard-step active" data-step="0">
+      <div class="gsap-elem">
+        <h3
+          style="
+            font-size: 1rem;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+          "
+        >
+          Now Tasting
+        </h3>
+        <h1 style="font-size: 3.5rem; margin: 0.5rem 0 2rem 0; line-height: 1">
+          {{ current_wine }}
+        </h1>
+        <p style="color: #666; font-style: italic">
+          Take a sip. What do you see?
+        </p>
+      </div>
+      <div class="action-bar">
+        <button onclick="animateNext(1)" class="btn gsap-elem">
+          Start Rating
+        </button>
+      </div>
+    </div>
+
+    <div class="wizard-step" data-step="1">
+      <h2 class="q-title gsap-elem">Visuals</h2>
+      <p class="q-subtitle gsap-elem">The intensity of the color.</p>
+
+      <div class="option-grid gsap-elem">
+        <button class="pill-btn" onclick="selectOption('color', 'Pale', this)">
+          <span class="color-dot" style="background: #e6cba5"></span> Pale
+        </button>
+        <button
+          class="pill-btn"
+          onclick="selectOption('color', 'Medium', this)"
+        >
+          <span class="color-dot" style="background: #b52f2f"></span> Medium
+        </button>
+        <button class="pill-btn" onclick="selectOption('color', 'Deep', this)">
+          <span class="color-dot" style="background: #4a0404"></span> Deep
+        </button>
+      </div>
+
+      <div class="action-bar gsap-elem">
+        <button onclick="animateNext(2)" class="btn">Next</button>
+      </div>
+    </div>
+
+    <div class="wizard-step" data-step="2">
+      <h2 class="q-title gsap-elem">The Nose</h2>
+      <p class="q-subtitle gsap-elem">What aromas can you identify?</p>
+
+      <div class="gsap-elem">
+        <input
+          type="text"
+          id="scent"
+          placeholder="e.g. Cherry, Oak..."
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="action-bar gsap-elem">
+        <button onclick="animateBack(1)" class="back-btn">Back</button>
+        <button onclick="animateNext(3)" class="btn">Next</button>
+      </div>
+    </div>
+
+    <div class="wizard-step" data-step="3">
+      <h2 class="q-title gsap-elem">The Palate</h2>
+      <p class="q-subtitle gsap-elem">Describe flavours and finish.</p>
+
+      <div
+        class="gsap-elem"
+        style="display: flex; flex-direction: column; gap: 1.5rem"
+      >
+        <input
+          type="text"
+          id="flavour"
+          placeholder="Flavours (e.g. Red fruits)"
+          autocomplete="off"
+        />
+        <input
+          type="text"
+          id="aftertaste"
+          placeholder="Aftertaste (e.g. Long, Spicy)"
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="action-bar gsap-elem">
+        <button onclick="animateBack(2)" class="back-btn">Back</button>
+        <button onclick="animateNext(4)" class="btn">Next</button>
+      </div>
+    </div>
+
+    <div class="wizard-step" data-step="4">
+      <h2 class="q-title gsap-elem">Structure</h2>
+      <p class="q-subtitle gsap-elem">Analyze the wines backbone.</p>
+
+      <div class="gsap-elem" style="margin-bottom: 1rem">
+        <label
+          style="
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+          "
+        >
+          <span>Acidity</span> <span id="acidity-val">5</span>
+        </label>
+        <input
+          type="range"
+          id="acidity"
+          min="1"
+          max="10"
+          value="5"
+          oninput="updateRangeVal('acidity')"
+        />
+      </div>
+
+      <div class="gsap-elem">
+        <label
+          style="
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+          "
+        >
+          <span>Tannin</span> <span id="tannin-val">5</span>
+        </label>
+        <input
+          type="range"
+          id="tannin"
+          min="1"
+          max="10"
+          value="5"
+          oninput="updateRangeVal('tannin')"
+        />
+      </div>
+
+      <div class="action-bar gsap-elem">
+        <button onclick="animateBack(3)" class="back-btn">Back</button>
+        <button onclick="animateNext(5)" class="btn">Next</button>
+      </div>
+    </div>
+
+    <div class="wizard-step" data-step="5">
+      <h2 class="q-title gsap-elem">The Guess</h2>
+      <p class="q-subtitle gsap-elem">Identify the origin and vintage.</p>
+
+      <div
+        class="gsap-elem"
+        style="display: flex; gap: 1rem; flex-direction: column"
+      >
+        <input type="text" id="country" placeholder="Country" />
+        <input type="text" id="region" placeholder="Region" />
+      </div>
+
+      <br />
+      <div
+        class="gsap-elem"
+        style="display: flex; gap: 1rem; flex-direction: column"
+      >
+        <select
+          id="grape"
+          style="
+            background: transparent;
+            width: 100%;
+            padding: 1rem;
+            border-bottom: 1px solid #ccc;
+            font-family: var(--font-serif);
+            font-size: 1.1rem;
+            outline: none;
+          "
+        >
+          <option value="" disabled selected>Select Grape</option>
+          <option value="Cabernet Sauvignon">Cabernet Sauvignon</option>
+          <option value="Merlot">Merlot</option>
+          <option value="Pinot Noir">Pinot Noir</option>
+          <option value="Syrah/Shiraz">Syrah / Shiraz</option>
+          <option value="Sangiovese">Sangiovese</option>
+          <option value="Nebbiolo">Nebbiolo</option>
+          <option value="Chardonnay">Chardonnay</option>
+          <option value="Sauvignon Blanc">Sauvignon Blanc</option>
+          <option value="Riesling">Riesling</option>
+          <option value="Blend">Blend</option>
+          <option value="Other">Other</option>
+        </select>
+
+        <div style="display: flex; gap: 10px">
+          <input
+            type="number"
+            id="year"
+            placeholder="Year"
+            style="width: 50%"
+          />
+          <input
+            type="number"
+            id="price"
+            placeholder="€ Price"
+            style="width: 50%"
+          />
+        </div>
+      </div>
+
+      <div class="action-bar gsap-elem">
+        <button onclick="animateBack(4)" class="back-btn">Back</button>
+        <button onclick="animateNext(6)" class="btn">Next</button>
+      </div>
+    </div>
+
+    <div class="wizard-step" data-step="6">
+      <h2 class="q-title gsap-elem">Final Verdict</h2>
+      <p class="q-subtitle gsap-elem">Rate the wine out of 5.</p>
+
+      <div class="gsap-elem" style="text-align: center; margin: 3rem 0">
+        <input
+          type="number"
+          id="Score"
+          min="1"
+          max="5"
+          placeholder="-"
+          style="
+            font-size: 2.4rem;
+            text-align: center;
+            width: 110px;
+            border: none;
+            border-bottom: 2px solid var(--burgundy);
+            background: transparent;
+            font-family: var(--font-serif);
+            color: var(--burgundy);
+          "
+        />
+      </div>
+
+      <div class="action-bar gsap-elem">
+        <button onclick="animateBack(5)" class="back-btn">Back</button>
+        <button onclick="submitTasting()" class="btn" style="width: 100%">
+          Submit Rating
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentStep = 0;
+  let tastingData = {
+    wineName: document.getElementById("wineName").value,
+    color: "",
+    scent: "",
+    flavour: "",
+    aftertaste: "",
+    acidity: 5,
+    tannin: 5,
+    country: "",
+    region: "",
+    grape: "",
+    year: null,
+    price: null,
+    score: null,
+  };
+
+  function toggleNav(show) {
+    const nav = document.querySelector(".nav-links2");
+    if (nav) {
+      if (show) {
+        gsap.to(nav, { y: 0, opacity: 1, duration: 0.5, pointerEvents: "all" });
+      } else {
+        gsap.to(nav, {
+          y: 30,
+          opacity: 0,
+          duration: 0.5,
+          pointerEvents: "none",
+        });
+      }
+    }
+  }
+
+  function updateRangeVal(id) {
+    document.getElementById(id + "-val").innerText =
+      document.getElementById(id).value;
+  }
+
+  function selectOption(category, value, btn) {
+    tastingData[category] = value;
+    let siblings = btn.parentElement.children;
+    for (let i = 0; i < siblings.length; i++)
+      siblings[i].classList.remove("selected");
+    btn.classList.add("selected");
+  }
+
+  function animateNext(nextStepIndex) {
+    const currentEl = document.querySelector(
+      `.wizard-step[data-step="${currentStep}"]`
+    );
+    const nextEl = document.querySelector(
+      `.wizard-step[data-step="${nextStepIndex}"]`
+    );
+
+    if (nextStepIndex === 1) {
+      toggleNav(false);
+    }
+
+    gsap.to(currentEl.querySelectorAll(".gsap-elem"), {
+      x: -50,
+      opacity: 0,
+      stagger: 0.05,
+      duration: 0.4,
+      ease: "power2.in",
+      onComplete: () => {
+        currentEl.classList.remove("active");
+        nextEl.classList.add("active");
+
+        gsap.set(nextEl.querySelectorAll(".gsap-elem"), { x: 50, opacity: 0 });
+
+        gsap.to(nextEl.querySelectorAll(".gsap-elem"), {
+          x: 0,
+          opacity: 1,
+          stagger: 0.1,
+          duration: 0.5,
+          ease: "power2.out",
+        });
+
+        let progress = (nextStepIndex / 6) * 100;
+        gsap.to("#liquidProgress", { height: `${progress}%`, duration: 0.8 });
+
+        currentStep = nextStepIndex;
+      },
+    });
+  }
+
+  function animateBack(prevStepIndex) {
+    const currentEl = document.querySelector(
+      `.wizard-step[data-step="${currentStep}"]`
+    );
+    const prevEl = document.querySelector(
+      `.wizard-step[data-step="${prevStepIndex}"]`
+    );
+
+    if (prevStepIndex === 0) {
+      toggleNav(true);
+    }
+
+    gsap.to(currentEl.querySelectorAll(".gsap-elem"), {
+      x: 50,
+      opacity: 0,
+      stagger: 0.05,
+      duration: 0.3,
+      ease: "power2.in",
+      onComplete: () => {
+        currentEl.classList.remove("active");
+        prevEl.classList.add("active");
+
+        gsap.set(prevEl.querySelectorAll(".gsap-elem"), { x: -50, opacity: 0 });
+
+        gsap.to(prevEl.querySelectorAll(".gsap-elem"), {
+          x: 0,
+          opacity: 1,
+          stagger: 0.1,
+          duration: 0.4,
+          ease: "power2.out",
+        });
+
+        currentStep = prevStepIndex;
+        let progress = (prevStepIndex / 6) * 100;
+        gsap.to("#liquidProgress", { height: `${progress}%`, duration: 0.8 });
+      },
+    });
+  }
+
+  function submitTasting() {
+    tastingData.scent = document.getElementById("scent").value;
+    tastingData.flavour = document.getElementById("flavour").value;
+    tastingData.aftertaste = document.getElementById("aftertaste").value;
+    tastingData.acidity = Number(document.getElementById("acidity").value);
+    tastingData.tannin = Number(document.getElementById("tannin").value);
+    tastingData.country = document.getElementById("country").value;
+    tastingData.region = document.getElementById("region").value;
+    tastingData.grape = document.getElementById("grape").value;
+    tastingData.year = document.getElementById("year").value;
+    tastingData.price = document.getElementById("price").value;
+    tastingData.score = Number(document.getElementById("Score").value);
+
+    if (!tastingData.score || tastingData.score < 1 || tastingData.score > 5) {
+      alert("Please enter a valid score (1-5)");
+      return;
+    }
+
+    fetch("/save_tasting", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(tastingData),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.status === "success") {
+          toggleNav(true);
+
+          gsap.to(".tasting-card", {
+            scale: 0.9,
+            opacity: 0,
+            duration: 0.5,
+            onComplete: () => window.location.reload(),
+          });
+        } else {
+          alert("Error saving tasting.");
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        alert("Network error occurred.");
+      });
+  }
+</script>
+{% endblock %}

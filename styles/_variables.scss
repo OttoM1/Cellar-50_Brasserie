@@ -1,0 +1,49 @@
+$cream: #f9f7f2;
+$charcoal: #1a1a1a;
+$burgundy: #4a0404;
+$burgundy-light: #6b1010;
+$burgundy-clear: #5e0f0f;
+$burgundy-glass: rgba(74, 4, 4, 0.8);
+$gold: #c5a059;
+$gold-bright: #e6d9ad;
+$stone: #e5e5e5;
+
+$glass-bg: rgba(255, 255, 255, 0.6);
+$glass-border: rgba(255, 255, 255, 0.4);
+$shadow-soft: 0 10px 40px rgba(0, 0, 0, 0.1);
+
+$font-serif: "Playfair Display", serif;
+$font-sans: "Montserrat", sans-serif;
+
+$wine-red: #b52f2f;
+$wine-white: #8a8a7a;
+$wine-sparkling: #226739;
+$wine-rose: #ff7738;
+
+$radius-sm: 8px;
+$radius-md: 16px;
+$radius-lg: 24px;
+$radius-pill: 50px;
+
+$nav-z: 100;
+$overlay-z: 9999;
+$toast-z: 10000;
+
+$ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
+$ease-spring: cubic-bezier(0.25, 1, 0.5, 1);
+
+:root {
+  --cream: #{$cream};
+  --charcoal: #{$charcoal};
+  --burgundy: #{$burgundy};
+  --burgundy-light: #{$burgundy-light};
+  --burgundyClear: #{$burgundy-clear};
+  --burgundy-glass: #{$burgundy-glass};
+  --gold: #{$gold-bright};
+  --stone: #{$stone};
+  --glass-bg: #{$glass-bg};
+  --glass-border: #{$glass-border};
+  --shadow-soft: #{$shadow-soft};
+  --font-serif: #{$font-serif};
+  --font-sans: #{$font-sans};
+}

@@ -1,0 +1,60 @@
+{% extends 'skeleton.html' %}
+{% block content %}
+
+<div class="summary-hero">
+  <h4 class="summary-hero__eyebrow">Event Summary</h4>
+  <h1 class="summary-hero__title">{{ event.event_name }}</h1>
+  <p class="summary-hero__host">Hosted by {{ event.host_name }}</p>
+
+  <div class="room-badge">
+    Room: <strong>{{ room_code }}</strong>
+    <button onclick="Cellar50.copyText('{{ room_code }}')" class="btn btn--sm btn--ghost"
+      style="padding:0.3rem 0.8rem">Copy</button>
+  </div>
+</div>
+
+<div class="summary-list">
+  {% for wine in stats %}
+  <article class="journal-entry summary-wine">
+    <div class="summary-wine__header">
+      <div>
+        <h3 class="summary-wine__name">{{ wine.wine_name }}</h3>
+        <span class="summary-wine__count">Rated by {{ wine.rating_count }} people</span>
+      </div>
+      <div style="text-align:right">
+        <div class="summary-score">{{ wine.avg_score }}<span>%</span></div>
+        <div class="summary-score__label">Avg Score</div>
+      </div>
+    </div>
+
+    <div class="summary-bars">
+      <div class="stat-bar">
+        <div class="stat-bar__header">
+          <span>Acidity</span><strong>{{ wine.avg_acidity }}</strong>
+        </div>
+        <div class="stat-bar__track">
+          <div class="stat-bar__fill stat-bar__fill--acidity"
+            style="width:{{ wine.avg_acidity * 10 }}%"></div>
+        </div>
+      </div>
+      <div class="stat-bar">
+        <div class="stat-bar__header">
+          <span>Tannin</span><strong>{{ wine.avg_tannin }}</strong>
+        </div>
+        <div class="stat-bar__track">
+          <div class="stat-bar__fill stat-bar__fill--tannin"
+            style="width:{{ wine.avg_tannin * 10 }}%"></div>
+        </div>
+      </div>
+    </div>
+  </article>
+  {% else %}
+  <p style="text-align:center; color:#888">No ratings yet.</p>
+  {% endfor %}
+
+  <div class="summary-actions">
+    <a href="/cellar" class="btn btn--ghost">Go to My Cellar</a>
+  </div>
+</div>
+
+{% endblock %}

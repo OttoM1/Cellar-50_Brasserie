@@ -1,0 +1,133 @@
+@use "../variables" as *;
+@use "../mixins" as *;
+
+.discover-header {
+  color: white;
+  font-size: clamp(2rem, 5vw, 2.7rem);
+  margin-bottom: 2rem;
+  margin-top: 6svh;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.35));
+}
+
+.cellarBg {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(to bottom, #2a0505 0%, $burgundy 40%, #1a1a1a 100%);
+  z-index: -3;
+}
+
+.discover-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  border-radius: $radius-lg;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.06),
+    0 16px 48px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+  position: relative;
+  z-index: 2;
+}
+
+.discover-search {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.8rem 1.15rem;
+  border-radius: $radius-pill;
+  border: 1px solid rgba(74, 4, 4, 0.1);
+  background: $cream;
+  color: $charcoal;
+  font-size: 0.9rem;
+  font-family: $font-sans;
+
+  &::placeholder { color: #aaa; }
+
+  &:focus {
+    background: #fff;
+    border-color: rgba(74, 4, 4, 0.35);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(74, 4, 4, 0.08);
+  }
+}
+
+.filter-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  width: 100%;
+
+  @media (min-width: 640px) {
+    width: auto;
+  }
+}
+
+.filter-pill {
+  padding: 0.5rem 1rem;
+  border-radius: $radius-pill;
+  border: 1px solid rgba(74, 4, 4, 0.12);
+  background: rgba(249, 247, 242, 0.8);
+  color: rgba(74, 4, 4, 0.65);
+  font-size: 0.68rem;
+  font-family: $font-sans;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.25s $ease-spring;
+
+  &:hover {
+    background: #fff;
+    color: $burgundy;
+    border-color: rgba(74, 4, 4, 0.25);
+  }
+
+  &.active {
+    background: $burgundy;
+    color: white;
+    border-color: $burgundy;
+    box-shadow: 0 3px 12px rgba(74, 4, 4, 0.3);
+  }
+}
+
+.discover-empty {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 3rem;
+  font-style: italic;
+}
+
+.discover .wine-card {
+  background: #fff;
+  border-radius: $radius-md;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    0 12px 32px rgba(0, 0, 0, 0.18);
+
+  &:hover,
+  &.is-active {
+    box-shadow:
+      0 4px 12px rgba(0, 0, 0, 0.1),
+      0 20px 40px rgba(0, 0, 0, 0.22);
+  }
+
+  h3 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+  }
+
+  p { font-size: 0.9rem; color: #888; }
+}
+
+.discover-count {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 1.25rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}

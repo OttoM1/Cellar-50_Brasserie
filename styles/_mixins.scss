@@ -1,0 +1,42 @@
+@use "variables" as *;
+
+@mixin glass-panel($blur: 16px) {
+  background: $glass-bg;
+  backdrop-filter: blur($blur);
+  -webkit-backdrop-filter: blur($blur);
+  border: 1px solid $glass-border;
+  box-shadow: $shadow-soft;
+  border-radius: 20px;
+}
+
+@mixin fade-in($duration: 0.5s) {
+  animation: fadeIn $duration ease forwards;
+}
+
+@mixin focus-ring {
+  &:focus-visible {
+    outline: 2px solid $burgundy;
+    outline-offset: 2px;
+  }
+}
+
+@mixin hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@mixin wine-type-accent($color) {
+  &.is-active,
+  &:hover {
+    border-color: $color;
+    transform: translateY(-5px);
+  }
+
+  span {
+    color: $color !important;
+  }
+}

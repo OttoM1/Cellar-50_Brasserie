@@ -1,0 +1,194 @@
+{% extends 'skeleton.html' %} {% block content %}
+
+<div class="mode-switch">
+  <button id="btn-host" class="mode-btn active" onclick="switchMode('host')">Host Event</button>
+  <button id="btn-join" class="mode-btn" onclick="switchMode('join')">Join Event</button>
+</div>
+
+<div class="setup-card">
+
+  <div id="section-host" class="section-container active">
+
+    <div class="host-step active" data-step="1">
+      <h2 class="setup-card__header">Event Details</h2>
+      <p class="setup-card__hint">Set the stage for your tasting.</p>
+
+      <div class="form-stack">
+        <input type="text" id="hostName" placeholder="Your Name (Host)" autocomplete="name" />
+        <input type="text" id="eventName" placeholder="Event Name (e.g. Italian Reds)" />
+      </div>
+
+      <div class="action-row">
+        <span></span>
+        <button onclick="nextHostStep(2)" class="btn">Next &rarr;</button>
+      </div>
+    </div>
+
+    <div class="host-step" data-step="2">
+      <h2 class="setup-card__header">The Wine List</h2>
+      <p class="setup-card__hint" style="font-size:0.85rem">Add wines in serving order.</p>
+
+      <div class="wine-list" id="wineListContainer"></div>
+
+      <div id="wineInputContainer" class="wine-input-row">
+        <input type="text" id="newWineInput" placeholder="e.g. 2018 Barolo"
+          onkeydown="handleEnter(event)" />
+        <button onclick="addWine()" class="btn" id="addWineBtn"
+          style="padding:0 1.5rem; font-size:1.2rem">+</button>
+      </div>
+
+      <div class="action-row">
+        <button onclick="nextHostStep(1)" class="mode-btn"
+          style="border:none; padding-left:0">&larr; Back</button>
+        <button onclick="submitCreation()" class="btn" id="createEventBtn">Create Event</button>
+      </div>
+    </div>
+
+    <div class="host-step" data-step="3" style="text-align:center">
+      <h2 class="setup-card__header" style="color:#2c2c2c">Event Ready!</h2>
+      <p class="setup-card__hint">Share this code with your guests:</p>
+
+      <div class="code-display" id="displayRoomCode">????</div>
+
+      <div class="code-actions">
+        <button onclick="copyRoomCode()" class="btn btn--sm btn--ghost">Copy Code</button>
+      </div>
+
+      <p style="font-size:0.9rem; color:#888; margin-bottom:2rem">
+        Wait for guests to join, then start.
+      </p>
+      <button onclick="window.location.href='/tasting'" class="btn" style="width:100%">
+        Enter Tasting Room
+      </button>
+    </div>
+
+  </div>
+
+
+  <div id="section-join" class="section-container">
+    <h2 class="setup-card__header">Join Tasting</h2>
+    <p class="setup-card__hint">Enter the code provided by your host.</p>
+
+    <div class="form-stack">
+      <input type="text" id="guestName" placeholder="Your Name" autocomplete="name" />
+      <input type="text" id="roomCode" placeholder="Room Code" maxlength="4"
+        style="text-transform:uppercase; letter-spacing:3px" />
+    </div>
+
+    <div style="margin-top:2rem; text-align:right">
+      <button onclick="submitJoin()" class="btn" id="joinEventBtn" style="width:100%">
+        Join Event
+      </button>
+    </div>
+  </div>
+
+</div>
+
+
+<script>
+let wines = [];
+
+function switchMode(mode) {
+  document.querySelectorAll(".mode-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById(`btn-${mode}`).classList.add("active");
+  document.querySelectorAll(".section-container").forEach(s => s.classList.remove("active"));
+  document.getElementById(`section-${mode}`).classList.add("active");
+}
+
+function nextHostStep(step) {
+  if (step === 2) {
+    const hName = document.getElementById("hostName").value.trim(),
+          eName = document.getElementById("eventName").value.trim();
+    if (!hName || !eName) return alert("Please fill in all fields.");
+  }
+
+  document.querySelectorAll(".host-step").forEach(el => el.classList.remove("active"));
+  const nextEl = document.querySelector(`.host-step[data-step="${step}"]`);
+  nextEl.classList.add("active");
+
+  if (typeof gsap !== "undefined")
+    gsap.fromTo(nextEl, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.4 });
+}
+
+function handleEnter(e) {
+  if (e.key === "Enter") { e.preventDefault(); addWine(); }
+}
+
+function addWine() {
+  const input = document.getElementById("newWineInput");
+  const val = input.value.trim();
+  if (!val) return;
+  wines.push(val);
+  renderWines();
+  input.value = "";
+  input.focus();
+}
+
+function renderWines() {
+  const container = document.getElementById("wineListContainer");
+  if (!wines.length) {
+    container.innerHTML = '<div style="text-align:center;color:#999;font-style:italic;padding:1rem">No wines added yet.</div>';
+    return;
+  }
+  container.innerHTML = wines.map((w, i) => `
+    <div class="wine-item">
+      <span><strong style="color:var(--burgundy);margin-right:10px">${i+1}.</strong> ${w}</span>
+      <button class="wine-item__remove" onclick="removeWine(${i})" aria-label="Remove">&times;</button>
+    </div>`).join("");
+}
+
+function removeWine(i) { wines.splice(i, 1); renderWines(); }
+
+async function submitCreation() {
+  if (!wines.length) return alert("Please add at least one wine.");
+
+  const btn = document.getElementById("createEventBtn");
+  btn.disabled = true;
+  btn.textContent = "Creating...";
+
+  try {
+    const data = await Cellar50.api("/create_event", {
+      method: "POST",
+      body: JSON.stringify({
+        hostName: document.getElementById("hostName").value.trim(),
+        eventName: document.getElementById("eventName").value.trim(),
+        wines,
+      }),
+    });
+    document.getElementById("displayRoomCode").textContent = data.room_code;
+    Cellar50.toast("Event created");
+    nextHostStep(3);
+  } catch (err) {
+    alert(err.message || "Error creating event");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Create Event";
+  }
+}
+
+async function submitJoin() {
+  const guestName = document.getElementById("guestName").value.trim(),
+        roomCode = document.getElementById("roomCode").value.trim();
+  if (!guestName || !roomCode) return alert("Please fill in all fields");
+
+  const btn = document.getElementById("joinEventBtn");
+  btn.disabled = true;
+  try {
+    await Cellar50.api("/join_event", {
+      method: "POST",
+      body: JSON.stringify({ guestName, roomCode }),
+    });
+    Cellar50.toast("Joined event");
+    window.location.href = "/tasting";
+  } catch (err) {
+    alert(err.message || "Could not find room.");
+  } finally { btn.disabled = false; }
+}
+
+function copyRoomCode() {
+  const code = document.getElementById("displayRoomCode").textContent;
+  if (code && code !== "????") Cellar50.copyText(code);
+}
+</script>
+
+{% endblock %}
