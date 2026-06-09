@@ -1,7 +1,7 @@
 ## start server
 
 ```
-git clone https://github.com/your-org/Cellar-50_Brasserie.git
+git clone https://github.com/OttoM1/Cellar-50_Brasserie.git
 cd Cellar-50_Brasserie
 
 # python side
